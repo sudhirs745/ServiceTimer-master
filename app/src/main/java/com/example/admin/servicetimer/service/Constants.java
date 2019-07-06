@@ -15,6 +15,7 @@ public class Constants {
     }
 
     public interface NOTIFICATION_ID {
-        public static int FOREGROUND_SERVICE = 1;
+        public static int FOREGROUND_SERVICE = 1;  //  with notifiation
+        public static int FOREGROUND_SERVICE_NOT_NOTIFICATION = 0; //  not  notifiation
     }
 }

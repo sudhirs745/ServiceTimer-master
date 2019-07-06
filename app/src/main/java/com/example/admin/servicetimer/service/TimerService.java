@@ -52,7 +52,7 @@ public class TimerService extends Service{
                 if (intent.hasExtra(Constants.TIMER.DURATION)) {
                     duration = intent.getLongExtra(Constants.TIMER.DURATION, 0);
                 }
-                startForeground(Constants.NOTIFICATION_ID.FOREGROUND_SERVICE, createTimerNotification());
+                startForeground(Constants.NOTIFICATION_ID.FOREGROUND_SERVICE_NOT_NOTIFICATION, createTimerNotification());
             } else if (intent.getAction().equals(Constants.ACTION.STOPFOREGROUND_ACTION)) {
                 stopForeground(true);
                 stopSelf();
@@ -68,10 +68,10 @@ public class TimerService extends Service{
         public void run() {
             SystemClock.elapsedRealtime();
 
-            if(currentTime == duration){
-                stopSelf();
-                return;
-            }
+//            if(currentTime == duration){
+//                stopSelf();
+//                return;
+//            }
             //Waits until the screen is turned back on
             while(!isScreenOn()){
                 try {

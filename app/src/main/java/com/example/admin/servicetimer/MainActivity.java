@@ -31,6 +31,12 @@ public class MainActivity extends Activity {
     Intent timerService;
     long currentTime, duration = 40000;
 
+    long currentTimeStart = 0L;
+    long temp = 0L;
+    String time ="0:00" ;
+
+    int status =0;    // 0  start 1  stop  2 resume
+
     @Override
     protected void onStart() {
         super.onStart();
@@ -44,32 +50,50 @@ public class MainActivity extends Activity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        currentTimeStart=0;
 
-
-        Button startButton, stopButton;
+        Button startButton, stopButton , resumeButton;
         timerView = (TextView) findViewById(R.id.timerValue);
         startButton = (Button) findViewById(R.id.startButton);
         stopButton = (Button) findViewById(R.id.stopButton);
+        resumeButton = (Button) findViewById(R.id.resumeButton);
 
         startButton.setOnClickListener(new View.OnClickListener() {
 
             public void onClick(View view) {
                 if(!isMyServiceRunning(TimerService.class)) {
                     timerService.setAction(Constants.ACTION.STARTFOREGROUND_ACTION);
-                    timerService.putExtra(Constants.TIMER.DURATION,duration);
+                    timerService.putExtra(Constants.TIMER.DURATION,0);
                     startService(timerService);
+                    currentTimeStart=0;
+                    status=0;
                     registerReceiver(broadcastReceiver, new IntentFilter(Constants.ACTION.BROADCAST_ACTION));
                 }
             }
         });
 
+        resumeButton.setOnClickListener(new View.OnClickListener() {
+
+            public void onClick(View view) {
+                if(!isMyServiceRunning(TimerService.class)) {
+                    timerService.setAction(Constants.ACTION.STARTFOREGROUND_ACTION);
+                    timerService.putExtra(Constants.TIMER.DURATION,0);
+                    startService(timerService);
+                    status=2;
+                  //  registerReceiver(broadcastReceiver, new IntentFilter(Constants.ACTION.BROADCAST_ACTION));
+                }
+            }
+        });
+
+
         stopButton.setOnClickListener(new View.OnClickListener() {
 
             public void onClick(View view) {
                 if(isMyServiceRunning(TimerService.class)) {
-                    timerView.setText("0:00");
+                    timerView.setText(time);
                     timerService.setAction(Constants.ACTION.STOPFOREGROUND_ACTION);
                     startService(timerService);
+                    status=1;
                     unregisterReceiver(broadcastReceiver);
                 }
             }
@@ -79,6 +103,7 @@ public class MainActivity extends Activity {
     @Override
     protected void onResume() {
         super.onResume();
+        currentTimeStart=0;
         if(!isMyServiceRunning(TimerService.class)) {
             timerView.setText("0:00");
         }
@@ -87,7 +112,7 @@ public class MainActivity extends Activity {
     @Override
     protected void onStop() {
         super.onStop();
-
+        currentTimeStart=0;
     }
 
     /******************** Broadcast Receiver **************************************/
@@ -111,15 +136,32 @@ public class MainActivity extends Activity {
 
         this.currentTime = intent.getLongExtra(Constants.TIMER.CURRENT_TIME, 0L);
 
+         if(status==1){
+             currentTimeStart =currentTime;
+             temp=currentTime;
+         }else if (status==0){
+             currentTimeStart=currentTime;
+             temp=currentTime;
+
+         }else  if(status==2){
+             currentTimeStart = temp + currentTime;
+
+             //status=3;
+         }
+
+        //currentTimeStart =currentTime;
+
+        Log.e("currentTime" , ""+ currentTime  +  " " + currentTimeStart) ;
         if(this.currentTime == duration){
             timerView.setText("0:00");
             Toast.makeText(this,"Timer done",Toast.LENGTH_SHORT).show();
             return false;
         }
 
-        int secs = (int) (currentTime / 1000);
+        int secs = (int) (currentTimeStart / 1000);
         int minutes = secs / 60;
 
+         time = Integer.toString(minutes) + ":" + String.format("%02d", secs % 60);;
         timerView.setText(Integer.toString(minutes) + ":" + String.format("%02d", secs%60));
         return true;
     }
